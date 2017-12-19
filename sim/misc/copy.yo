@@ -1,0 +1,62 @@
+                      | # Fang Chenguang 2015013232
+                      | 
+  0x000:              | .pos 0
+  0x000:              | init: 
+  0x000: 30f400010000 |     irmovl Stack, %esp  	# Set up stack pointer
+  0x006: 30f500010000 | 	irmovl Stack, %ebp  	# Set up base pointer
+  0x00c: 702c000000   |     jmp Main
+                      | 
+  0x014:              | .align 4
+                      | # Source block 
+  0x014:              | src:
+  0x014: 0a000000     |     .long 0x00a
+  0x018: b0000000     |     .long 0x0b0
+  0x01c: 000c0000     |     .long 0xc00
+                      | 
+                      | # Destination block 
+  0x020:              | dest:
+  0x020: 11010000     |     .long 0x111
+  0x024: 22020000     |     .long 0x222
+  0x028: 33030000     |     .long 0x333
+                      | 
+  0x02c:              | Main:
+  0x02c: 30f014000000 |     irmovl src, %eax
+  0x032: a00f         |     pushl %eax
+  0x034: 30f020000000 |     irmovl dest, %eax
+  0x03a: a00f         |     pushl %eax
+  0x03c: 30f003000000 |     irmovl $3, %eax
+  0x042: a00f         |     pushl %eax
+  0x044: 8052000000   |     call copyBlock
+  0x049: 30f60c000000 |     irmovl $12, %esi
+  0x04f: 6164         |     subl %esi, %esp
+  0x051: 00           |     halt
+                      | 
+  0x052:              | copyBlock:
+  0x052: a05f         |     pushl %ebp
+  0x054: 2045         |     rrmovl %esp, %ebp
+  0x056: 501508000000 |     mrmovl 8(%ebp), %ecx   # ecx <- len
+  0x05c: 50350c000000 |     mrmovl 12(%ebp), %ebx  # ebx <- Destination
+  0x062: 502510000000 |     mrmovl 16(%ebp), %edx  # edx <- Source
+                      |     
+  0x068: 6100         |     subl %eax, %eax # eax <- 0
+  0x06a: 6211         |     andl %ecx, %ecx # if ecx == 0, quit
+  0x06c: 7396000000   |     je quit
+                      | 
+  0x071:              | loop:
+  0x071: 506200000000 |     mrmovl (%edx), %esi
+  0x077: 406300000000 |     rmmovl %esi, (%ebx)
+  0x07d: 6360         |     xorl %esi, %eax
+  0x07f: 30f704000000 |     irmovl $4, %edi
+  0x085: 6073         |     addl %edi, %ebx
+  0x087: 6072         |     addl %edi, %edx
+  0x089: 30f701000000 |     irmovl $1, %edi
+  0x08f: 6171         |     subl %edi, %ecx
+  0x091: 7471000000   |     jne loop
+                      | 
+  0x096:              | quit:
+  0x096: 2054         |     rrmovl %ebp, %esp
+  0x098: b05f         |     popl %ebp
+  0x09a: 90           |     ret    
+                      | 
+  0x100:              | .pos 0x100
+  0x100:              | Stack:

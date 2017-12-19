@@ -1,0 +1,62 @@
+# Fang Chenguang 2015013232
+
+.pos 0
+init: 
+    irmovl Stack, %esp  	# Set up stack pointer
+	irmovl Stack, %ebp  	# Set up base pointer
+    jmp Main
+
+.align 4
+# Source block 
+src:
+    .long 0x00a
+    .long 0x0b0
+    .long 0xc00
+
+# Destination block 
+dest:
+    .long 0x111
+    .long 0x222
+    .long 0x333
+
+Main:
+    irmovl src, %eax
+    pushl %eax
+    irmovl dest, %eax
+    pushl %eax
+    irmovl $3, %eax
+    pushl %eax
+    call copyBlock
+    irmovl $12, %esi
+    subl %esi, %esp
+    halt
+
+copyBlock:
+    pushl %ebp
+    rrmovl %esp, %ebp
+    mrmovl 8(%ebp), %ecx   # ecx <- len
+    mrmovl 12(%ebp), %ebx  # ebx <- Destination
+    mrmovl 16(%ebp), %edx  # edx <- Source
+    
+    subl %eax, %eax # eax <- 0
+    andl %ecx, %ecx # if ecx == 0, quit
+    je quit
+
+loop:
+    mrmovl (%edx), %esi
+    rmmovl %esi, (%ebx)
+    xorl %esi, %eax
+    irmovl $4, %edi
+    addl %edi, %ebx
+    addl %edi, %edx
+    irmovl $1, %edi
+    subl %edi, %ecx
+    jne loop
+
+quit:
+    rrmovl %ebp, %esp
+    popl %ebp
+    ret    
+
+.pos 0x100
+Stack:

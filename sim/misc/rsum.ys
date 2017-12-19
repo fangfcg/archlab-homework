@@ -1,0 +1,52 @@
+# Fang Chenguang 2015013232
+
+.pos 0
+init: 
+    irmovl Stack, %esp  	# Set up stack pointer
+	irmovl Stack, %ebp  	# Set up base pointer
+    jmp Main
+
+# Sample linked list
+.align 4 
+ele1:
+    .long 0x00a
+    .long ele2
+ele2:
+    .long 0x0b0
+    .long ele3
+ele3:
+    .long 0xc00
+    .long 0
+
+Main:
+    irmovl ele1, %eax
+    pushl %eax
+    call rsumList
+    halt
+
+rsumList:
+    pushl %ebp
+    rrmovl %esp, %ebp
+    mrmovl 8(%ebp), %ecx
+    xorl %eax, %eax    # eax <- 0
+    andl %ecx, %ecx    # if ecx == 0, return
+    je quit
+    mrmovl (%ecx), %edx
+    addl %edx, %eax
+    mrmovl 4(%ecx), %ecx
+    pushl %eax
+    pushl %ecx         # push next pointer
+    call rsumList
+    popl %ecx
+    rrmovl %eax, %ebx
+    popl %eax
+    addl %ebx, %eax
+
+quit:
+    rrmovl %ebp, %esp
+    popl %ebp
+    ret
+
+
+.pos 0x100
+Stack:
